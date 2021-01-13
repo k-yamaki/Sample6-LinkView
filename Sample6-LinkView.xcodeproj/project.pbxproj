@@ -14,6 +14,7 @@
 		AECE648325ABD59C009A39EC /* MySpot.swift in Sources */ = {isa = PBXBuildFile; fileRef = AECE648225ABD59C009A39EC /* MySpot.swift */; };
 		AECE648625ABD767009A39EC /* LinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AECE648525ABD767009A39EC /* LinkView.swift */; };
 		AECE648A25AC4314009A39EC /* MyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AECE648925AC4314009A39EC /* MyView.swift */; };
+		AECE64AA25AD66D6009A39EC /* ViewSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = AECE64A925AD66D6009A39EC /* ViewSize.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		AECE648225ABD59C009A39EC /* MySpot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MySpot.swift; sourceTree = "<group>"; };
 		AECE648525ABD767009A39EC /* LinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkView.swift; sourceTree = "<group>"; };
 		AECE648925AC4314009A39EC /* MyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyView.swift; sourceTree = "<group>"; };
+		AECE64A925AD66D6009A39EC /* ViewSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewSize.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 				AECE648225ABD59C009A39EC /* MySpot.swift */,
 				AECE648925AC4314009A39EC /* MyView.swift */,
 				AECE648525ABD767009A39EC /* LinkView.swift */,
+				AECE64A925AD66D6009A39EC /* ViewSize.swift */,
 				AECE647625ABD557009A39EC /* Assets.xcassets */,
 				AECE647B25ABD557009A39EC /* Info.plist */,
 				AECE647825ABD557009A39EC /* Preview Content */,
@@ -148,6 +151,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AECE648325ABD59C009A39EC /* MySpot.swift in Sources */,
+				AECE64AA25AD66D6009A39EC /* ViewSize.swift in Sources */,
 				AECE647525ABD555009A39EC /* ContentView.swift in Sources */,
 				AECE648A25AC4314009A39EC /* MyView.swift in Sources */,
 				AECE648625ABD767009A39EC /* LinkView.swift in Sources */,

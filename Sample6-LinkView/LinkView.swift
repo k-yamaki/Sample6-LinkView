@@ -7,52 +7,52 @@
 
 import SwiftUI
 
-struct ViewSize {
-    // 画面のサイズ
-    var largeView : CGSize = .zero
-    var smallView : CGSize = .zero
-    // スポットのサイズ
-    var largeSpot : CGRect = .zero
-    var smallSpot : CGRect = .zero
-    var smallViewHeightLimit : CGFloat = .zero
-}
 
-
-enum ViewType {
-    case large
-    case small
-}
 struct LinkView: View {
     @State var mySpot = MySpot()
     @State var viewSize = ViewSize()
     @State var largeMove : CGSize = .zero
     @State var smallMove : CGSize = .zero
-    @GestureState var magnifyBy = CGFloat(1.0)
-
+    @State var zoomMove : CGSize = .zero
+    @GestureState var magnifyBy = CGFloat(1.0)  // ピンチの倍率データ
+    
     var body: some View {
         GeometryReader{ geometry in
             VStack{
+                // 拡大画面（大画面）
                 Rectangle()
                     .foregroundColor(.white)
                     .frame(width:viewSize.largeView.width, height: viewSize.largeView.height)
                     .overlay(
-                        MyView(mySpot: mySpot, viewSize: $viewSize.largeView, spotSize: $viewSize.largeSpot)
-                            // .offset(x:1000, y:0)
+                        MyView(mySpot: mySpot, viewSize: viewSize.largeView, spotSize: viewSize.largeSpot)
                             .offset(x:viewSize.largeSpot.minX, y:viewSize.largeSpot.minY)
                             .foregroundColor(.red)
                             .frame(width:viewSize.largeSpot.width * magnifyBy, height: viewSize.largeSpot.height * magnifyBy)
-                            .gesture(drag)              // ドラッグ処理
-                            .gesture(magnification)     // 拡大処理
-                        )
+                            .gesture(largeDrag)     // ドラッグ処理
+                            .gesture(largeZoom)     // 拡大処理
+                        , alignment: .topLeading)
+                // 全体画面（小画面）
                 Rectangle()
                     .foregroundColor(.white)
                     .frame(width:viewSize.smallView.width, height: viewSize.smallView.height)
                     .overlay(
-                        MyView(mySpot: mySpot, viewSize: $viewSize.smallView, spotSize: $viewSize.smallSpot)
-                            .offset(x:viewSize.smallSpot.minX, y:viewSize.smallSpot.minY)
-                            .foregroundColor(.blue)
-                            .frame(width: viewSize.smallSpot.width, height: viewSize.smallSpot.height)
-                )
+                        ZStack {
+                            MyView(mySpot: mySpot, viewSize: viewSize.smallView, spotSize: viewSize.smallSpot)
+                                .offset(x:viewSize.smallSpot.minX, y:viewSize.smallSpot.minY)
+                                .foregroundColor(.blue)
+                                .frame(width: viewSize.smallSpot.width, height: viewSize.smallSpot.height)
+                            // ZOOMエリア
+                            Rectangle()
+                                .opacity(0.01)
+                                .frame(width:viewSize.zoomArea.width, height:viewSize.zoomArea.height)
+                                .position(x:viewSize.zoomArea.midX, y: viewSize.zoomArea.midY)
+                                .gesture(zoomDrag)     // ドラッグ処理
+                            Rectangle()
+                                .stroke(Color.red, lineWidth: 2)
+                                .frame(width:viewSize.zoomArea.width, height:viewSize.zoomArea.height)
+                                .position(x:viewSize.zoomArea.midX, y: viewSize.zoomArea.midY)
+                        }
+                        , alignment: .topLeading)
             }
             // 初期表示で、Viewのサイズを設定
             .onAppear{
@@ -60,49 +60,41 @@ struct LinkView: View {
             }
         }
     }
-    // ドラッグの処理
-    var drag: some Gesture {
+    // ズームエリアのドラッグ処理
+    var zoomDrag: some Gesture {
+        
         DragGesture()
             .onChanged { value in
-                largeMove.width = value.translation.width
-                largeMove.height = value.translation.height
-                let p1 = CGPoint(x: viewSize.largeSpot.minX+largeMove.width, y: viewSize.largeSpot.minY+largeMove.height)
-                let p2 = CGPoint(x: viewSize.largeSpot.maxX+largeMove.width, y: viewSize.largeSpot.minY+largeMove.height)
-                let p3 = CGPoint(x: viewSize.largeSpot.minX+largeMove.width, y: viewSize.largeSpot.maxY+largeMove.height)
-                // let p4 = CGPoint(x: viewSize.largeSpot.maxX+largeMove.width, y: viewSize.largeSpot.maxY+largeMove.height)
-                print("p1 = \(p1)")
-                print("p2 = \(p2)")
-                /*
-                if (viewSize.largeSpot.size.width + largeMove.width) > viewSize.largeView.width {
-                    if p1.x > 0 {
-                        largeMove.width = -viewSize.largeSpot.minX
-                    }
-                    if p2.x < viewSize.largeView.width {
-                        largeMove.width = viewSize.largeView.width - viewSize.largeSpot.maxX
-                    }
-                }
- */
-
-                if p1.y > 0 {
-                    largeMove.height = -viewSize.largeSpot.minY
-                }
-                if p3.y < viewSize.largeView.height {
-                    largeMove.height = viewSize.largeView.height - viewSize.largeSpot.maxY
-                }
+                // 画面以上に大きさになるように調整
+                zoomMove = viewSize.moveSpot(type: .zoom, moveSize: value.translation)
             }
             .onEnded { value in
-                viewSize.largeSpot.origin.x += largeMove.width
-                viewSize.largeSpot.origin.y += largeMove.height
+                viewSize.zoomAreaOrigin = CGPoint(x: viewSize.zoomAreaOrigin.x + zoomMove.width,
+                                                   y: viewSize.zoomAreaOrigin.y + zoomMove.height)
                 largeMove = .zero
             }
     }
-    // ピンチイン・ピンチアウトの処理
-    var magnification: some Gesture {
+    // 拡大画面のドラッグ処理
+    var largeDrag: some Gesture {
+        
+        DragGesture()
+            .onChanged { value in
+                // 画面以上に大きさになるように調整
+                largeMove = viewSize.moveSpot(type: .large, moveSize: value.translation)
+            }
+            .onEnded { value in
+                viewSize.largeSpotOrigin = CGPoint(x: viewSize.largeSpotOrigin.x + largeMove.width,
+                                                   y: viewSize.largeSpotOrigin.y + largeMove.height)
+                largeMove = .zero
+            }
+    }
+    // 拡大画面のピンチ処理
+    var largeZoom: some Gesture {
         MagnificationGesture()
             // ピンチの確定
             .onEnded { value in
-                viewSize.largeSpot.size.width *= magnifyBy
-                viewSize.largeSpot.size.height *= magnifyBy
+                viewSize.largeSpotSize = CGSize(width : viewSize.largeSpot.size.width * magnifyBy,
+                                                height: viewSize.largeSpot.size.height * magnifyBy)
             }
             // ピンチの移動
             .updating($magnifyBy) { currentState, gestureState, transaction in

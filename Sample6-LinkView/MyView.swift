@@ -9,8 +9,8 @@ import SwiftUI
 
 struct MyView : View {
     var mySpot : MySpot
-    @Binding var viewSize : CGSize
-    @Binding var spotSize : CGRect
+    var viewSize : CGSize
+    var spotSize : CGRect
     
     var body: some View {
         let magnify = spotSize.width / mySpot.size.width
